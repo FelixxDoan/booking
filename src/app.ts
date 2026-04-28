@@ -5,6 +5,8 @@ import { prisma } from "./config/db.js";
 import { ok } from "./common/utils/response.js";
 import handleError from "./common/middlewares/handleError.js";
 
+import authRouter from './modules/auth/auth.routes.js'
+
 const createApp = () => {
   const app = express();
 
@@ -28,6 +30,8 @@ const createApp = () => {
       next(error);
     }
   });
+
+  app.use("/auth",authRouter)
 
   app.use(handleError);
 

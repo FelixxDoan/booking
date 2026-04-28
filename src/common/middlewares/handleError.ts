@@ -5,6 +5,7 @@ const codes: Record<number, string> = {
   401: "UNAUTHORIZED",
   403: "FORBIDDEN",
   404: "NOT_FOUND",
+  409: "CONFLICT",
   429: "RATE_LIMITED",
   500: "INTERNAL_SERVER_ERROR",
   504: "UPSTREAM_TIMEOUT",

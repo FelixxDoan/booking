@@ -78,7 +78,7 @@ const env = () => {
   const db_url = isUrl(initDB_URL);
   const level = parseLogLevel(initLogLevel);
   const secret = isPresence(initSecret)
-  const ttl = isTimeOut(initTTL)
+  const ttl = isPresence(initTTL)
 
   return {
     port,

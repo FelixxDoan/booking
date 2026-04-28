@@ -23,7 +23,8 @@
     "pino-http": "^11.0.0",
     "prisma": "^7.7.0",
     "bcrypt": "^6.0.0",
-    "jsonwebtoken":"^9.0.3" 
+    "jsonwebtoken":"^9.0.3",
+    "zod":"^3.25.76"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
