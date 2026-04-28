@@ -1,16 +1,11 @@
 import { prisma } from "../../config/db.js";
-
-type CreateUserInput = {
-  fullName: string;
-  email: string;
-  passwordHash: string;
-};
+import { LoginInput, RegisterInput } from "../auth/auth.validation.js";
 
 export const createUser = async ({
   fullName,
   email,
   passwordHash,
-}: CreateUserInput) => {
+}: RegisterInput) => {
   return prisma.user.create({
     data: {
       fullName,
@@ -18,11 +13,24 @@ export const createUser = async ({
       passwordHash,
     },
     select: {
-      id: true,
       fullName: true,
       email: true,
       role: true,
       createdAt: true,
+    },
+  });
+};
+
+export const findUser = async ({ email }: LoginInput) => {
+  return prisma.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id:true,
+      email: true,
+      role: true,
+      passwordHash: true,
     },
   });
 };

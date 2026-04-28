@@ -6,6 +6,7 @@ import { ok } from "./common/utils/response.js";
 import handleError from "./common/middlewares/handleError.js";
 
 import authRouter from './modules/auth/auth.routes.js'
+import userRouter from './modules/users/user.routes.js'
 
 const createApp = () => {
   const app = express();
@@ -32,6 +33,7 @@ const createApp = () => {
   });
 
   app.use("/auth",authRouter)
+  app.use("/user",userRouter)
 
   app.use(handleError);
 
