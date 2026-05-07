@@ -5,11 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     image: booking-backend:dev
-    container_name: booking-backend
+    container_name: backend
     ports:
       - "3000:3000"
     env_file:
-      - .env.docker
+      - .env.example
     depends_on:
       postgres:
         condition: service_healthy
@@ -20,6 +20,7 @@ services:
 
   postgres:
     image: postgres:16
+    container_name: db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

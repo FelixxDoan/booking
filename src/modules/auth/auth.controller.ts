@@ -1,11 +1,10 @@
 import handleRespone, { created, ok } from "../../common/utils/response.js";
 import throwErr from "../../common/utils/throwError.js";
+import { findUserById } from "../users/user.repository.js";
 import { registerService, loginService } from "./auth.service.js";
 
 export const regiserController = handleRespone(async (req, res) => {
   const { fullName, email, password } = req.body;
-
-  if (!fullName || !email || !password) throwErr(400, "Missing fields");
 
   const { data, message } = await registerService({
     fullName,
@@ -19,9 +18,15 @@ export const regiserController = handleRespone(async (req, res) => {
 export const loginController = handleRespone(async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) throwErr(400, "Missing fields");
-
   const { data, message } = await loginService({ email, password });
 
   ok(res, data, message);
+});
+
+export const meController = handleRespone(async (req, res) => {
+  const id = req.user?.id;
+
+  const user = await findUserById(id);
+
+  ok(res, user, "Get info success");
 });

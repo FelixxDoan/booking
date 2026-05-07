@@ -11,13 +11,16 @@ const authenticate: RequestHandler = (req, res, next) => {
 
   const token = auth?.split(" ")[1];
   if (!token) return throwErr(401, "Missing token");
-
-  const payload = verifyToken(token);
-
+  let payload;
+  try {
+    payload = verifyToken(token);
+  } catch {
+    throwErr(401, "Invalid or expired token");
+  }
   (req as any).user = {
-    id: payload.id,
-    role: payload.role,
-    email: payload.email,
+    id: payload?.id,
+    role: payload?.role,
+    email: payload?.email,
   };
 
   next();

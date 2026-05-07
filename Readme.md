@@ -20,3 +20,18 @@ Make sure you have installed:
 ```bash
 git clone <your-repository-url>
 cd booking
+
+## Demo accounts
+
+For local development only:
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@example.com | Password123! |
+| Tutor | tutor@example.com | Password123! |
+| Student | student@example.com | Password123! |
+
+Run seed:
+
+```bash
+npm run prisma:seed

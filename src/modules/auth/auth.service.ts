@@ -1,7 +1,7 @@
 import { Prisma } from "../../generated/prisma/client.js";
 import { hashPassword, comparePassword } from "../../common/utils/password.js";
 import throwErr from "../../common/utils/throwError.js";
-import { createUser, findUser } from "../users/user.repository.js";
+import { createUser, findUserByEmail } from "../users/user.repository.js";
 import { LoginInput, RegisterInput } from "./auth.validation.js";
 import { signToken } from "../../common/utils/jwt.js";
 
@@ -42,7 +42,7 @@ export const registerService = async ({
 };
 
 export const loginService = async ({ email, password }: LoginInput) => {
-  const user = await findUser({ email });
+  const user = await findUserByEmail( email );
   if (!user) return throwErr(401, "Invalid email or password");
 
   const checkPassword = await comparePassword(password, user.passwordHash);

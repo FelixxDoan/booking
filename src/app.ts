@@ -1,5 +1,9 @@
 import express from "express";
 import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+
+import { swaggerSpec } from "./docs/swagger.js";
+
 
 import { prisma } from "./config/db.js";
 import { ok } from "./common/utils/response.js";
@@ -34,6 +38,10 @@ const createApp = () => {
 
   app.use("/auth",authRouter)
   app.use("/user",userRouter)
+
+
+
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   app.use(handleError);
 
