@@ -20,12 +20,58 @@ enum UserStatus {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   fullName     String
-  email        String     @unique
+  email        String        @unique
   passwordHash String
-  role         UserRole   @default(STUDENT)
-  status       UserStatus @default(ACTIVE)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  role         UserRole      @default(STUDENT)
+  tutorProfile TutorProfile?
+
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+enum ServiceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ServiceMode {
+  ONLINE
+  OFFLINE
+  HYBRID
+}
+
+model Service {
+  id              String       @id @default(uuid())
+  code            String       @unique
+  name            String
+  subject         String
+  description     String?
+  durationMinutes Int
+  price           Decimal      @db.Decimal(10, 2)
+  level           ServiceLevel
+  mode            ServiceMode
+  isActive        Boolean      @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TutorProfile {
+  id                String   @id @default(uuid())
+  userId            Int      @unique
+  headline          String?
+  bio               String?
+  subjects          String[]
+  yearsOfExperience Int?
+  teachingModes     String[]
+  isActive          Boolean  @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
