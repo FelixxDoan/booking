@@ -11,6 +11,7 @@ import handleError from "./common/middlewares/handleError.js";
 
 import authRouter from './modules/auth/auth.routes.js'
 import userRouter from './modules/users/user.routes.js'
+import serviceRouter from './modules/services/service.routes.js'
 
 const createApp = () => {
   const app = express();
@@ -38,7 +39,7 @@ const createApp = () => {
 
   app.use("/auth",authRouter)
   app.use("/user",userRouter)
-
+  app.use("/service", serviceRouter);
 
 
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -6,6 +6,14 @@
     "rootDir": "./src",
     "outDir": "./dist",
 
+    "paths": {
+      "#generated/*": ["./src/generated/prisma/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@common/*": ["./src/common/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@config/*": ["./src/config/*"]
+    },
+
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -14,6 +22,7 @@
     "resolveJsonModule": true,
     "sourceMap": true
   },
+
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
