@@ -1,7 +1,15 @@
 import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../config/db.js";
-import { serviceInputSchema } from "./service.validation.js";
+import { CreateServiceInput, UpdateServiceInput } from "./service.validation.js";
 import throwErr from "../../common/utils/throwError.js";
+
+export const getAllServices = async () => {
+  const services = await prisma.service.findMany();
+  return {
+    data: services,
+    message: "Services retrieved successfully",
+  };
+};
 
 export const createService = async ({
   code,
@@ -13,7 +21,7 @@ export const createService = async ({
   level,
   mode,
   isActive,
-}: serviceInputSchema) => {
+}: CreateServiceInput) => {
   try {
     const service = await prisma.service.create({
       data: {
@@ -49,6 +57,23 @@ export const createService = async ({
   }
 };
 
-export const updateService = async () => {
-  
+export const updateService = async ({ body }: UpdateServiceInput) => {
+  const {id, ...data} = body;
+  try {
+    const service = await prisma.service.update({
+        where: { id },
+        data,
+    })
+    return {
+      data: service,
+      message: "Service updated successfully",
+    };
+  } catch (error) {
+    if(error instanceof Prisma.PrismaClientKnownRequestError) {
+      if(error.code === "P2025") {
+        throwErr(404, "Service not found");
+      }
+  }
+    throw error;
+  }
 }

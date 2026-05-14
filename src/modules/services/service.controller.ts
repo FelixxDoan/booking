@@ -1,5 +1,10 @@
-import handleRespone, { created } from "../../common/utils/response.js";
-import { createService } from "./service.service.js";
+import handleRespone, { created, ok } from "../../common/utils/response.js";
+import { createService, getAllServices, updateService } from "./service.service.js";
+
+export const getAllController = handleRespone(async (req, res) => {
+  const { data, message } = await getAllServices();
+  ok(res, data, message);
+});
 
 export const createController = handleRespone(async (req, res) => {
   const {
@@ -27,4 +32,14 @@ export const createController = handleRespone(async (req, res) => {
   });
 
   created(res, data, message);
+});
+
+export const updateController = handleRespone(async (req, res) => {
+  const { id } = req.params;
+  const body = req.body;
+
+  const { data, message } = await updateService({ body: { id, ...body } });
+
+  ok(res, data, message);
+
 });
