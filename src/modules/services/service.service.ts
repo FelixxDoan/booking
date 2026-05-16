@@ -4,7 +4,7 @@ import { CreateServiceInput, UpdateServiceInput } from "./service.validation.js"
 import throwErr from "../../common/utils/throwError.js";
 
 export const getAllServices = async () => {
-  const services = await prisma.service.findMany();
+  const services = await prisma.service.findMany({where: { isActive: true }});
   return {
     data: services,
     message: "Services retrieved successfully",
@@ -77,3 +77,18 @@ export const updateService = async ({ body }: UpdateServiceInput) => {
     throw error;
   }
 }
+
+export const detailService = async (id: string) => {
+  const service = await prisma.service.findUnique({
+    where: { id, isActive: true, },
+  });
+
+  if (!service) {
+    throwErr(404, "Service not found");
+  }
+
+  return {
+    data: service,
+    message: "Service retrieved successfully",
+  };
+};

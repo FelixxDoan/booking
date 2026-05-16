@@ -37,7 +37,7 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
+  const tutorUser = await prisma.user.upsert({
     where: { email: "tutor@example.com" },
     update: {},
     create: {
@@ -46,6 +46,29 @@ async function main() {
       passwordHash,
       role: UserRole.TUTOR,
       status: UserStatus.ACTIVE,
+    },
+  });
+
+  await prisma.tutorProfile.upsert({
+    where: {
+      userId: tutorUser.id,
+    },
+    update: {
+      headline: "Demo Tutor",
+      bio: "Demo tutor profile for booking flow.",
+      subjects: ["Math", "Physics"],
+      yearsOfExperience: 3,
+      teachingModes: ["ONLINE"],
+      isActive: true,
+    },
+    create: {
+      userId: tutorUser.id,
+      headline: "Demo Tutor",
+      bio: "Demo tutor profile for booking flow.",
+      subjects: ["Math", "Physics"],
+      yearsOfExperience: 3,
+      teachingModes: ["ONLINE"],
+      isActive: true,
     },
   });
 

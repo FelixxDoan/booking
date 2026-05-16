@@ -1,5 +1,5 @@
 import handleRespone, { created, ok } from "../../common/utils/response.js";
-import { createService, getAllServices, updateService } from "./service.service.js";
+import { createService, detailService, getAllServices, updateService } from "./service.service.js";
 
 export const getAllController = handleRespone(async (req, res) => {
   const { data, message } = await getAllServices();
@@ -42,4 +42,12 @@ export const updateController = handleRespone(async (req, res) => {
 
   ok(res, data, message);
 
+});
+
+export const detailController = handleRespone(async (req, res) => {
+  const { id } = req.params;
+
+  const { data, message } = await detailService(id);
+
+  ok(res, data, message);
 });
