@@ -4,7 +4,15 @@ import { CreateServiceInput, UpdateServiceInput } from "./service.validation.js"
 import throwErr from "../../common/utils/throwError.js";
 
 export const getAllServices = async () => {
-  const services = await prisma.service.findMany({where: { isActive: true }});
+  const services = await prisma.service.findMany({where: { isActive: true }, orderBy: { createdAt: "desc" }});
+  return {
+    data: services,
+    message: "Services retrieved successfully",
+  };
+};
+
+export const getAllAdminServices = async () => {
+  const services = await prisma.service.findMany({orderBy: { updatedAt: "desc" }});
   return {
     data: services,
     message: "Services retrieved successfully",

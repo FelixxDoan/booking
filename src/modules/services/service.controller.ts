@@ -1,8 +1,13 @@
 import handleRespone, { created, ok } from "../../common/utils/response.js";
-import { createService, detailService, getAllServices, updateService } from "./service.service.js";
+import { createService, detailService, getAllAdminServices, getAllServices, updateService } from "./service.service.js";
 
 export const getAllController = handleRespone(async (req, res) => {
   const { data, message } = await getAllServices();
+  ok(res, data, message);
+});
+
+export const getAllAdminController = handleRespone(async (req, res) => {
+  const { data, message } = await getAllAdminServices();
   ok(res, data, message);
 });
 

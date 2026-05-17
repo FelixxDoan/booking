@@ -17,8 +17,14 @@ import tutorRouter from './modules/tutor/tutor.routes.js'
 const createApp = () => {
   const app = express();
 
+  app.use(
+    cors({
+      origin: "*",
+      methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
   app.use(express.json());
-  app.use(cors());
 
   app.get("/healthz", (req, res) => {
     res.status(200).json({ message: "Service run well" });
@@ -38,13 +44,13 @@ const createApp = () => {
     }
   });
 
-  app.use("/auth",authRouter)
-  app.use("/user",userRouter)
-  app.use("/service", serviceRouter);
-  app.use("/tutor",tutorRouter);
+  app.use("/auth", authRouter)
+  app.use("/user", userRouter)
+  app.use("/services", serviceRouter);
+  app.use("/tutor", tutorRouter);
 
 
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   app.use(handleError);
 
