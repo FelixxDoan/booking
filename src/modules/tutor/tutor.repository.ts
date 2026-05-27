@@ -1,4 +1,5 @@
 import { prisma } from "@config/db.js";
+import { tutorProfileInput } from "@modules/auth/auth.validation.js";
 
 const activeTutorWhere = {
     role: "TUTOR" as const,
@@ -28,4 +29,22 @@ export const getTutorById = async (id: number) => {
             tutorProfile: true,
         }
     });
-}   
+}
+
+export const upsertTutorProfile = async (id: number, tutorProfile: tutorProfileInput) => {
+    return await prisma.tutorProfile.upsert({
+        where: {
+            userId: id
+        },
+        update: {
+            ...tutorProfile
+        },
+        create: {
+            ...tutorProfile,
+            user: {
+                connect: {
+                    id,
+                },
+            }
+        }})
+}

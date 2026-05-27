@@ -1,4 +1,4 @@
-import { PrismaClient, ServiceLevel, ServiceMode } from "#generated/index.js";
+import { PrismaClient, ServiceLevel, ServiceMode, Weekday, BookingStatus, BookingSource } from "#generated/index.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import env from "./env.js";
 import type { Logger } from "pino";
@@ -22,4 +22,4 @@ const connectDB = async (logger: Logger) => {
   }
 };
 
-export { prisma, connectDB , ServiceLevel, ServiceMode};
+export { prisma, connectDB, ServiceLevel, ServiceMode, Weekday, BookingStatus, BookingSource };

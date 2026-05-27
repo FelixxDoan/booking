@@ -2,9 +2,10 @@ import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../config/db.js";
 import { CreateServiceInput, UpdateServiceInput } from "./service.validation.js";
 import throwErr from "../../common/utils/throwError.js";
+import { allServices, detailService } from "./service.repository.js";
 
 export const getAllServices = async () => {
-  const services = await prisma.service.findMany({where: { isActive: true }, orderBy: { createdAt: "desc" }});
+  const services = await allServices();
   return {
     data: services,
     message: "Services retrieved successfully",
@@ -12,7 +13,7 @@ export const getAllServices = async () => {
 };
 
 export const getAllAdminServices = async () => {
-  const services = await prisma.service.findMany({orderBy: { updatedAt: "desc" }});
+  const services = await prisma.service.findMany({ orderBy: { updatedAt: "desc" } });
   return {
     data: services,
     message: "Services retrieved successfully",
@@ -66,37 +67,35 @@ export const createService = async ({
 };
 
 export const updateService = async ({ body }: UpdateServiceInput) => {
-  const {id, ...data} = body;
+  const { id, ...data } = body;
   try {
     const service = await prisma.service.update({
-        where: { id },
-        data,
+      where: { id },
+      data,
     })
     return {
       data: service,
       message: "Service updated successfully",
     };
   } catch (error) {
-    if(error instanceof Prisma.PrismaClientKnownRequestError) {
-      if(error.code === "P2025") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
         throwErr(404, "Service not found");
       }
-  }
+    }
     throw error;
   }
 }
 
-export const detailService = async (id: string) => {
-  const service = await prisma.service.findUnique({
-    where: { id, isActive: true, },
-  });
+export const getDetailService = async (id: string) => {
 
+  const service = await detailService(id);
   if (!service) {
     throwErr(404, "Service not found");
   }
-
   return {
     data: service,
     message: "Service retrieved successfully",
   };
+
 };

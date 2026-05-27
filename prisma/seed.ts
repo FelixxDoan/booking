@@ -150,6 +150,62 @@ async function main() {
     });
   }
 
+  await prisma.workingHours.deleteMany();
+
+  await prisma.workingHours.createMany({
+    data: [
+      {
+        weekday: "MONDAY",
+        startTime: "08:00",
+        endTime: "17:00",
+        timezone: "Asia/Ho_Chi_Minh",
+        isActive: true,
+      },
+      {
+        weekday: "TUESDAY",
+        startTime: "08:00",
+        endTime: "17:00",
+        timezone: "Asia/Ho_Chi_Minh",
+        isActive: true,
+      },
+      {
+        weekday: "WEDNESDAY",
+        startTime: "08:00",
+        endTime: "17:00",
+        timezone: "Asia/Ho_Chi_Minh",
+        isActive: true,
+      },
+      {
+        weekday: "THURSDAY",
+        startTime: "08:00",
+        endTime: "17:00",
+        timezone: "Asia/Ho_Chi_Minh",
+        isActive: true,
+      },
+      {
+        weekday: "FRIDAY",
+        startTime: "08:00",
+        endTime: "17:00",
+        timezone: "Asia/Ho_Chi_Minh",
+        isActive: true,
+      },
+      {
+        weekday: "SATURDAY",
+        startTime: "09:00",
+        endTime: "12:00",
+        timezone: "Asia/Ho_Chi_Minh",
+        isActive: true,
+      },
+      {
+        weekday: "SUNDAY",
+        startTime: "09:00",
+        endTime: "12:00",
+        timezone: "Asia/Ho_Chi_Minh",
+        isActive: false,
+      },
+    ],
+  });
+
   console.log("Seed completed");
 }
 

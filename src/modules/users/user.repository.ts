@@ -13,6 +13,7 @@ export const createUser = async ({
       passwordHash,
     },
     select: {
+      id: true,
       fullName: true,
       email: true,
       role: true,
@@ -50,3 +51,41 @@ export const findUserById = async (id : number) => {
     },
   });
 };
+
+export const getAllUsers = async () => {
+  return await prisma.user.findMany({
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+
+      tutorProfile: {
+        select: {
+          id: true,
+          headline: true,
+          bio: true,
+          subjects: true,
+          yearsOfExperience: true,
+          teachingModes: true,
+          isActive: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const deleteUser = async (id:number | string) => {
+  const transId = typeof(id) === "string" ? Number(id) : id
+  return await prisma.user.delete({
+    where: {
+      id: transId
+    }
+  })
+}

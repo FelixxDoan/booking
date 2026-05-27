@@ -13,6 +13,8 @@ import authRouter from './modules/auth/auth.routes.js'
 import userRouter from './modules/users/user.routes.js'
 import serviceRouter from './modules/services/service.routes.js'
 import tutorRouter from './modules/tutor/tutor.routes.js'
+import availabilityRouter from './modules/availability/availability.routes.js'
+import bookingRouter from './modules/bookings/booking.routes.js'
 
 const createApp = () => {
   const app = express();
@@ -48,6 +50,8 @@ const createApp = () => {
   app.use("/user", userRouter)
   app.use("/services", serviceRouter);
   app.use("/tutor", tutorRouter);
+  app.use("/availability", availabilityRouter);
+  app.use("/booking",bookingRouter )
 
 
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
