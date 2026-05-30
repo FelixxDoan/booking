@@ -112,7 +112,7 @@ export const getDetailsBlockedSlotService = async (
     return await prisma.blockedSlot.findMany({
         where,
         select: {
-            date: true,
+            date: true, 
             startTime: true,
             endTime: true,
         },
@@ -289,11 +289,8 @@ export const serviceAvailableSlots = async ({
 
     const candidateSlots = await getListAvailableTimeSlots(date, serviceId);
 
-    console.log({candidateSlots})
-
     const blockedSlots = await getDetailsBlockedSlotService(date, tutorId);
 
-    console.log({blockedSlots})
     if (hasFullDayBlockedSlot(blockedSlots)) {
         return {
             data: [],
@@ -301,19 +298,21 @@ export const serviceAvailableSlots = async ({
         };
     }
 
+    if(tutorId !== undefined){
+        let checkTutor = await getTutorById(tutorId)
+
+        if(!checkTutor) throwErr(404, 'Tutor inactive or not exist')
+    }
+
     const bookedSlots = await getBookedSlots({
         date,
         tutorId,
     });
 
-    console.log({bookedSlots})
-
     const unavailableRanges: TimeRange[] = [
         ...mapBlockedSlotsToTimeRanges(blockedSlots),
         ...mapBookedSlotsToTimeRanges(bookedSlots),
     ];
-
-    console.log({unavailableRanges})
 
     const availableSlots = filterAvailableSlots(
         candidateSlots,
