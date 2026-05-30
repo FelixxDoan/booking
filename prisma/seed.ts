@@ -26,7 +26,25 @@ const prisma = new PrismaClient({
 
 const seedDate = (date: string) => new Date(`${date}T00:00:00.000Z`);
 
+const clearData = async () => {
+  console.log("Clearing old development data...");
+
+  await prisma.$transaction([
+    prisma.bookingStatusHistory.deleteMany(),
+    prisma.booking.deleteMany(),
+    prisma.blockedSlot.deleteMany(),
+    prisma.tutorProfile.deleteMany(),
+    prisma.workingHours.deleteMany(),
+    prisma.service.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
+
+  console.log("Old development data cleared");
+};
+
 async function main() {
+
+  await clearData()
   const passwordHash = await bcrypt.hash("Password123!", 10);
 
   /**
