@@ -11,24 +11,29 @@ import {
 } from "../src/generated/prisma/client.js";
 
 const dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) throw new Error("DATABASE_URL is missing");
 
-if (!dbUrl) {
-  throw new Error("DATABASE_URL is missing");
-}
-
-const adapter = new PrismaPg({
-  connectionString: dbUrl,
-});
-
-const prisma = new PrismaClient({
-  adapter,
-});
+const adapter = new PrismaPg({ connectionString: dbUrl });
+const prisma = new PrismaClient({ adapter });
 
 const seedDate = (date: string) => new Date(`${date}T00:00:00.000Z`);
 
-const clearData = async () => {
-  console.log("Clearing old development data...");
+// Định nghĩa đúng 10 môn học theo yêu cầu
+const SUBJECTS = [
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "English",
+  "Computer Science",
+  "History",
+  "Biology",
+  "Geography",
+  "Literature",
+  "Art"
+];
 
+const clearData = async () => {
+  console.log("Xóa dữ liệu cũ...");
   await prisma.$transaction([
     prisma.bookingStatusHistory.deleteMany(),
     prisma.booking.deleteMany(),
@@ -38,28 +43,19 @@ const clearData = async () => {
     prisma.service.deleteMany(),
     prisma.user.deleteMany(),
   ]);
-
-  console.log("Old development data cleared");
+  console.log("Đã xóa xong dữ liệu cũ.");
 };
 
 async function main() {
-
-  await clearData()
+  await clearData();
   const passwordHash = await bcrypt.hash("Password123!", 10);
 
-  /**
-   * 1. Seed users first
-   * Vì TutorProfile, BlockedSlot.createdBy, BlockedSlot.tutorId đều phụ thuộc User.
-   */
+  // 1. Tạo 1 Tài khoản Admin mặc định
   const admin = await prisma.user.upsert({
     where: { email: "admin@example.com" },
-    update: {
-      fullName: "Demo Admin",
-      role: UserRole.ADMIN,
-      status: UserStatus.ACTIVE,
-    },
+    update: {},
     create: {
-      fullName: "Demo Admin",
+      fullName: "Hệ Thống Admin",
       email: "admin@example.com",
       passwordHash,
       role: UserRole.ADMIN,
@@ -67,351 +63,171 @@ async function main() {
     },
   });
 
-  const tutorMath = await prisma.user.upsert({
-    where: { email: "math.tutor@example.com" },
-    update: {
-      fullName: "Nguyen Minh Tutor",
-      role: UserRole.TUTOR,
-      status: UserStatus.ACTIVE,
-    },
-    create: {
-      fullName: "Nguyen Minh Tutor",
-      email: "math.tutor@example.com",
-      passwordHash,
-      role: UserRole.TUTOR,
-      status: UserStatus.ACTIVE,
-    },
-  });
-
-  const tutorEnglish = await prisma.user.upsert({
-    where: { email: "english.tutor@example.com" },
-    update: {
-      fullName: "Tran English Tutor",
-      role: UserRole.TUTOR,
-      status: UserStatus.ACTIVE,
-    },
-    create: {
-      fullName: "Tran English Tutor",
-      email: "english.tutor@example.com",
-      passwordHash,
-      role: UserRole.TUTOR,
-      status: UserStatus.ACTIVE,
-    },
-  });
-
-  const studentOne = await prisma.user.upsert({
-    where: { email: "student@example.com" },
-    update: {
-      fullName: "Demo Student",
-      role: UserRole.STUDENT,
-      status: UserStatus.ACTIVE,
-    },
-    create: {
-      fullName: "Demo Student",
-      email: "student@example.com",
-      passwordHash,
-      role: UserRole.STUDENT,
-      status: UserStatus.ACTIVE,
-    },
-  });
-
-  const studentTwo = await prisma.user.upsert({
-    where: { email: "student2@example.com" },
-    update: {
-      fullName: "Second Demo Student",
-      role: UserRole.STUDENT,
-      status: UserStatus.ACTIVE,
-    },
-    create: {
-      fullName: "Second Demo Student",
-      email: "student2@example.com",
-      passwordHash,
-      role: UserRole.STUDENT,
-      status: UserStatus.ACTIVE,
-    },
-  });
-
-  /**
-   * 2. Seed tutor profiles after tutor users
-   */
-  await prisma.tutorProfile.upsert({
-    where: { userId: tutorMath.id },
-    update: {
-      headline: "Mathematics and General Tutor",
-      bio: "Experienced tutor for Mathematics and general academic support.",
-      subjects: ["Mathematics", "Physics"],
-      yearsOfExperience: 3,
-      teachingModes: ["ONLINE", "OFFLINE"],
-      isActive: true,
-    },
-    create: {
-      userId: tutorMath.id,
-      headline: "Mathematics and General Tutor",
-      bio: "Experienced tutor for Mathematics and general academic support.",
-      subjects: ["Mathematics", "Physics"],
-      yearsOfExperience: 3,
-      teachingModes: ["ONLINE", "OFFLINE"],
-      isActive: true,
-    },
-  });
-
-  await prisma.tutorProfile.upsert({
-    where: { userId: tutorEnglish.id },
-    update: {
-      headline: "English Communication Tutor",
-      bio: "Tutor focused on English communication, pronunciation, and confidence building.",
-      subjects: ["English"],
-      yearsOfExperience: 4,
-      teachingModes: ["ONLINE"],
-      isActive: true,
-    },
-    create: {
-      userId: tutorEnglish.id,
-      headline: "English Communication Tutor",
-      bio: "Tutor focused on English communication, pronunciation, and confidence building.",
-      subjects: ["English"],
-      yearsOfExperience: 4,
-      teachingModes: ["ONLINE"],
-      isActive: true,
-    },
-  });
-
-  /**
-   * 3. Seed services
-   */
-  const services = [
-    {
-      code: "MATH-BEG-60",
-      name: "Toán học cơ bản cho học sinh cấp 2",
-      subject: "Mathematics",
-      description: "Hệ thống hóa kiến thức đại số và hình học nền tảng.",
-      durationMinutes: 60,
-      price: 150000,
-      level: ServiceLevel.BEGINNER,
-      mode: ServiceMode.ONLINE,
-      isActive: true,
-    },
-    {
-      code: "MATH-INT-90",
-      name: "Toán nâng cao luyện tư duy",
-      subject: "Mathematics",
-      description: "Rèn luyện tư duy giải bài và kỹ năng xử lý đề nâng cao.",
-      durationMinutes: 90,
-      price: 250000,
-      level: ServiceLevel.INTERMEDIATE,
-      mode: ServiceMode.ONLINE,
-      isActive: true,
-    },
-    {
-      code: "ENG-INT-60",
-      name: "Tiếng Anh giao tiếp trung cấp",
-      subject: "English",
-      description: "Tập trung vào phản xạ, phát âm và giao tiếp tình huống.",
-      durationMinutes: 60,
-      price: 220000,
-      level: ServiceLevel.INTERMEDIATE,
-      mode: ServiceMode.ONLINE,
-      isActive: true,
-    },
-    {
-      code: "PROG-ADV-120",
-      name: "Lập trình Backend với Node.js chuyên sâu",
-      subject: "Computer Science",
-      description: "Xây dựng API, xử lý database, authentication và business logic thực tế.",
-      durationMinutes: 120,
-      price: 500000,
-      level: ServiceLevel.ADVANCED,
-      mode: ServiceMode.HYBRID,
-      isActive: true,
-    },
-    {
-      code: "TRIAL-FREE-30",
-      name: "Buổi học thử miễn phí",
-      subject: "General",
-      description: "Đánh giá trình độ và tư vấn lộ trình học tập.",
-      durationMinutes: 30,
-      price: 0,
-      level: ServiceLevel.BEGINNER,
-      mode: ServiceMode.ONLINE,
-      isActive: true,
-    },
-    {
-      code: "OLD-COURSE",
-      name: "Khóa học cũ đã ngừng nhận lịch",
-      subject: "History",
-      description: "Dữ liệu cũ để kiểm tra logic lọc service inactive.",
-      durationMinutes: 45,
-      price: 100000,
-      level: ServiceLevel.BEGINNER,
-      mode: ServiceMode.ONLINE,
-      isActive: false,
-    },
+  // 2. Tạo 10 Giáo viên (Tutors) & Xử lý phân phối môn học logic
+  console.log("Đang khởi tạo 10 Giáo viên (Đảm bảo phủ đủ 10 môn)...");
+  const tutors: any[] = [];
+  const tutorNames = [
+    "Nguyễn Minh Tâm", "Trần Thị Hương", "Lê Hoàng Nam", "Phạm Hồng Phúc", 
+    "Vũ Tiến Đạt", "Hoàng Thúy Nga", "Ngô Quốc Bảo", "Đỗ Diệu Linh", 
+    "Bùi Văn Hùng", "Phan Thanh Thảo"
   ];
+
+  for (let i = 0; i < 10; i++) {
+    const email = `tutor.${i + 1}@example.com`;
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: {
+        fullName: tutorNames[i],
+        email,
+        passwordHash,
+        role: UserRole.TUTOR,
+        status: UserStatus.ACTIVE,
+      },
+    });
+    tutors.push(user);
+
+    // --- THUẬT TOÁN ĐẢM BẢO PHỦ ĐỦ MÔN ---
+    // Giáo viên thứ `i` chắc chắn sẽ dạy môn thứ `i` trong danh sách SUBJECTS
+    const mandatorySubject = SUBJECTS[i]; 
+
+    // Lọc ra các môn còn lại để chọn ngẫu nhiên thêm (tránh trùng môn chính)
+    const remainingSubjects = SUBJECTS.filter(s => s !== mandatorySubject);
+    const shuffledRemaining = remainingSubjects.sort(() => 0.5 - Math.random());
+    
+    // Sinh thêm ngẫu nhiên từ 0 đến 2 môn nữa
+    const extraCount = Math.floor(Math.random() * 3); // Trả về 0, 1 hoặc 2
+    const extraSubjects = shuffledRemaining.slice(0, extraCount);
+
+    // Gộp lại thành mảng danh sách môn của giáo viên đó (Tối đa 3 môn)
+    const assignedSubjects = [mandatorySubject, ...extraSubjects];
+
+    await prisma.tutorProfile.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: {
+        userId: user.id,
+        headline: `Chuyên gia giảng dạy: ${assignedSubjects.join(", ")}`,
+        bio: `Giáo viên phụ trách chính môn ${mandatorySubject}. Phương pháp sư phạm thực tế, tận tâm.`,
+        subjects: assignedSubjects,
+        yearsOfExperience: Math.floor(Math.random() * 8) + 2,
+        teachingModes: i % 2 === 0 ? ["ONLINE", "OFFLINE"] : ["ONLINE"],
+        isActive: true,
+      },
+    });
+  }
+
+  // 3. Tạo 5 Học sinh (Students)
+  console.log("Đang khởi tạo 5 Học sinh...");
+  const studentNames = [
+    "Nguyễn Văn An", "Trần Đức Bình", "Lê Minh Châu", "Phạm Tiến Dũng", "Hoàng Hải Yến"
+  ];
+  for (let i = 0; i < 5; i++) {
+    const email = `student.${i + 1}@example.com`;
+    await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: {
+        fullName: studentNames[i],
+        email,
+        passwordHash,
+        role: UserRole.STUDENT,
+        status: UserStatus.ACTIVE,
+      },
+    });
+  }
+
+  // 4. Khởi tạo danh sách các Dịch vụ học tập (Services) tương ứng với 10 môn
+  console.log("Đang tạo danh sách khóa học cho 10 môn học...");
+  const services = SUBJECTS.flatMap((subj, index) => {
+    const shortSubj = subj.substring(0, 3).toUpperCase();
+    return [
+      {
+        code: `${shortSubj}-BEG-${index + 1}`,
+        name: `Khóa học ${subj} Nền Tảng`,
+        subject: subj,
+        description: `Bổ trợ và củng cố kiến thức môn ${subj} cho mọi đối tượng học sinh.`,
+        durationMinutes: 60,
+        price: 150000 + (index * 10000),
+        level: ServiceLevel.BEGINNER,
+        mode: ServiceMode.ONLINE,
+        isActive: true,
+      },
+      {
+        code: `${shortSubj}-ADV-${index + 1}`,
+        name: `Luyện thi ${subj} Nâng Cao`,
+        subject: subj,
+        description: `Bồi dưỡng tư duy chuyên sâu, mẹo giải bài tập khó môn ${subj}.`,
+        durationMinutes: 90,
+        price: 250000 + (index * 10000),
+        level: ServiceLevel.ADVANCED,
+        mode: ServiceMode.HYBRID,
+        isActive: true,
+      }
+    ];
+  });
 
   for (const service of services) {
     await prisma.service.upsert({
       where: { code: service.code },
-      update: {
-        name: service.name,
-        subject: service.subject,
-        description: service.description,
-        durationMinutes: service.durationMinutes,
-        price: service.price,
-        level: service.level,
-        mode: service.mode,
-        isActive: service.isActive,
-      },
+      update: {},
       create: service,
     });
   }
 
-  /**
-   * 4. Seed weekly working hours
-   * Dùng upsert vì weekday là unique.
-   */
-  const workingHours = [
-    {
-      weekday: Weekday.MONDAY,
-      startTime: "08:00",
-      endTime: "17:00",
-      isActive: true,
-    },
-    {
-      weekday: Weekday.TUESDAY,
-      startTime: "08:00",
-      endTime: "17:00",
-      isActive: true,
-    },
-    {
-      weekday: Weekday.WEDNESDAY,
-      startTime: "08:00",
-      endTime: "17:00",
-      isActive: true,
-    },
-    {
-      weekday: Weekday.THURSDAY,
-      startTime: "08:00",
-      endTime: "17:00",
-      isActive: true,
-    },
-    {
-      weekday: Weekday.FRIDAY,
-      startTime: "08:00",
-      endTime: "17:00",
-      isActive: true,
-    },
-    {
-      weekday: Weekday.SATURDAY,
-      startTime: "09:00",
-      endTime: "12:00",
-      isActive: true,
-    },
-    {
-      weekday: Weekday.SUNDAY,
-      startTime: "09:00",
-      endTime: "12:00",
-      isActive: false,
-    },
+  // 5. Khởi tạo Khung giờ làm việc hàng tuần (Working Hours)
+  console.log("Đang tạo khung giờ làm việc...");
+  const weekdays = [
+    Weekday.MONDAY, Weekday.TUESDAY, Weekday.WEDNESDAY, 
+    Weekday.THURSDAY, Weekday.FRIDAY, Weekday.SATURDAY
   ];
-
-  for (const item of workingHours) {
+  for (const day of weekdays) {
     await prisma.workingHours.upsert({
-      where: { weekday: item.weekday },
-      update: {
-        startTime: item.startTime,
-        endTime: item.endTime,
-        timezone: "Asia/Ho_Chi_Minh",
-        isActive: item.isActive,
-      },
+      where: { weekday: day },
+      update: {},
       create: {
-        weekday: item.weekday,
-        startTime: item.startTime,
-        endTime: item.endTime,
+        weekday: day,
+        startTime: "08:00",
+        endTime: "21:00",
         timezone: "Asia/Ho_Chi_Minh",
-        isActive: item.isActive,
+        isActive: true,
       },
     });
   }
 
-  /**
-   * 5. Clean old demo blocked slots
-   * Vì BlockedSlot chưa có unique key tự nhiên, xóa các seed cũ theo prefix rồi tạo lại.
-   */
-  await prisma.blockedSlot.deleteMany({
-    where: {
-      reason: {
-        startsWith: "[SEED]",
-      },
-    },
-  });
+  // 6. Tạo một vài Blocked slots mẫu cho Giáo viên đầu tiên làm dữ liệu test chặn lịch
+  if (tutors.length > 0) {
+    console.log("Tạo lịch bận mẫu cho giáo viên...");
+    await prisma.blockedSlot.createMany({
+      data: [
+        {
+          date: seedDate("2026-06-20"),
+          startTime: null,
+          endTime: null,
+          reason: "[SEED] Toàn bộ hệ thống nghỉ lễ Quốc Gia",
+          createdBy: admin.id,
+        },
+        {
+          tutorId: tutors[0].id,
+          date: seedDate("2026-06-22"),
+          startTime: "09:00",
+          endTime: "11:00",
+          reason: "[SEED] Giáo viên bận việc cá nhân",
+          createdBy: tutors[0].id,
+        }
+      ]
+    });
+  }
 
-  /**
-   * 6. Seed blocked slots
-   *
-   * Demo dates:
-   * 2026-06-01 MONDAY    -> normal working day
-   * 2026-06-02 TUESDAY   -> global full-day blocked
-   * 2026-06-03 WEDNESDAY -> global partial blocked 10:00-12:00
-   * 2026-06-04 THURSDAY  -> math tutor full-day blocked
-   * 2026-06-05 FRIDAY    -> math tutor partial blocked 13:00-15:00
-   */
-  await prisma.blockedSlot.createMany({
-    data: [
-      {
-        date: seedDate("2026-06-02"),
-        startTime: null,
-        endTime: null,
-        reason: "[SEED] Public holiday - full day blocked for everyone",
-        createdBy: admin.id,
-      },
-      {
-        date: seedDate("2026-06-03"),
-        startTime: "10:00",
-        endTime: "12:00",
-        reason: "[SEED] Staff meeting - global partial blocked time",
-        createdBy: admin.id,
-      },
-      {
-        tutorId: tutorMath.id,
-        date: seedDate("2026-06-04"),
-        startTime: null,
-        endTime: null,
-        reason: "[SEED] Math tutor unavailable - full day",
-        createdBy: admin.id,
-      },
-      {
-        tutorId: tutorMath.id,
-        date: seedDate("2026-06-05"),
-        startTime: "13:00",
-        endTime: "15:00",
-        reason: "[SEED] Math tutor personal appointment",
-        createdBy: tutorMath.id,
-      },
-      {
-        tutorId: tutorEnglish.id,
-        date: seedDate("2026-06-05"),
-        startTime: "09:00",
-        endTime: "10:30",
-        reason: "[SEED] English tutor morning blocked time",
-        createdBy: tutorEnglish.id,
-      },
-    ],
-  });
-
-  console.log("Seed completed successfully");
-  console.log("Demo accounts password: Password123!");
-  console.log({
-    admin: admin.email,
-    tutorMath: tutorMath.email,
-    tutorEnglish: tutorEnglish.email,
-    studentOne: studentOne.email,
-    studentTwo: studentTwo.email,
-  });
+  console.log("\n--- HOÀN THÀNH SEED DỮ LIỆU MỞ RỘNG ---");
+  console.log(`- Đã tạo: 1 Admin, 10 Tutors (mỗi môn chắc chắn có ít nhất 1 người dạy), 5 Students.`);
+  console.log(`- Đảm bảo phủ đủ toàn bộ 10 môn học: ${SUBJECTS.join(", ")}`);
+  console.log(`- Mật khẩu đăng nhập chung: Password123!`);
 }
 
 main()
   .catch((error) => {
-    console.error("Seed failed");
+    console.error("Seed dữ liệu thất bại:");
     console.error(error);
     process.exit(1);
   })

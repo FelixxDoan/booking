@@ -5,7 +5,7 @@ import {
 } from "@common/utils/time.js";
 import { prisma, Weekday } from "@config/db.js";
 import { getBookedSlots } from "@modules/bookings/booking.repository.js";
-import { getTutorById } from "@modules/tutor/tutor.repository.js";
+import { getTutorById, getTutorBySubject } from "@modules/tutor/tutor.repository.js";
 
 export type Slot = {
     date: Date;
@@ -63,6 +63,7 @@ export const updateWorkingHoursService = async (
         weekday: Weekday;
         startTime: string;
         endTime: string;
+        isActive: boolean;
     }[]
 ) => {
     const updatedWorkingHours = await prisma.$transaction(
@@ -74,11 +75,13 @@ export const updateWorkingHoursService = async (
                 update: {
                     startTime: wh.startTime,
                     endTime: wh.endTime,
+                    isActive: wh.isActive,
                 },
                 create: {
                     weekday: wh.weekday,
                     startTime: wh.startTime,
                     endTime: wh.endTime,
+                    isActive: wh.isActive,
                 },
             })
         )
@@ -128,7 +131,7 @@ const checkFullDayBlocked = async (date: Date, tutorId?: number) => {
             tutorId: tutorId ?? null,
         },
     });
-
+    
     return Boolean(dayBlocked);
 };
 
@@ -275,52 +278,68 @@ const filterAvailableSlots = (
     });
 };
 
-/**
- * Main availability service
- */
+export const tutorAvailableSlots = async ( subject: string ) => {
 
-export const serviceAvailableSlots = async ({
-    date: targetDate,
-    serviceId,
-    tutorId: rawTutorId,
-}: ServiceAvailableSlotsInput) => {
-    const date = new Date(targetDate);
-    const tutorId = Number(rawTutorId);
+    const tutors = await getTutorBySubject(subject);
 
-    const candidateSlots = await getListAvailableTimeSlots(date, serviceId);
-
-    const blockedSlots = await getDetailsBlockedSlotService(date, tutorId);
-
-    if (hasFullDayBlockedSlot(blockedSlots)) {
+    if (!tutors) {
         return {
             data: [],
-            message: "No available slots, the entire day is blocked",
+            message: "No tutors found for the specified subject",
         };
     }
-
-    if(tutorId !== undefined){
-        let checkTutor = await getTutorById(tutorId)
-
-        if(!checkTutor) throwErr(404, 'Tutor inactive or not exist')
-    }
-
-    const bookedSlots = await getBookedSlots({
-        date,
-        tutorId,
-    });
-
-    const unavailableRanges: TimeRange[] = [
-        ...mapBlockedSlotsToTimeRanges(blockedSlots),
-        ...mapBookedSlotsToTimeRanges(bookedSlots),
-    ];
-
-    const availableSlots = filterAvailableSlots(
-        candidateSlots,
-        unavailableRanges
-    );
-
+    
     return {
-        data: availableSlots,
-        message: "Available slots retrieved successfully",
+        data: tutors,
+        message: "Tutors retrieved successfully",
+    }
+};
+
+
+export const serviceAvailableSlots = async ({
+  date: targetDate,
+  serviceId,
+  tutorId: rawTutorId,
+}: ServiceAvailableSlotsInput) => {
+  const date = new Date(targetDate);
+
+  const tutorId =
+    rawTutorId !== undefined && rawTutorId !== null
+      ? Number(rawTutorId)
+      : undefined;
+
+  const candidateSlots = await getListAvailableTimeSlots(date, serviceId);
+  console.log({candidateSlots})
+
+  const blockedSlots = await getDetailsBlockedSlotService(date, tutorId);
+//   console.log({blockedSlots})
+
+  if (hasFullDayBlockedSlot(blockedSlots)) {
+    return {
+      data: [],
+      message: "No available slots, the entire day is blocked",
     };
+  }
+
+  if (tutorId !== undefined) {
+    const checkTutor = await getTutorById(tutorId);
+
+    if (!checkTutor) throwErr(404, "Tutor inactive or not exist");
+  }
+
+  const bookedSlots = await getBookedSlots({ date, tutorId })
+//   console.log({bookedSlots})
+
+  const unavailableRanges: TimeRange[] = [
+    ...mapBlockedSlotsToTimeRanges(blockedSlots),
+    ...mapBookedSlotsToTimeRanges(bookedSlots),
+  ];
+//   console.log({unavailableRanges})
+
+  const availableSlots = filterAvailableSlots(candidateSlots, unavailableRanges);
+
+  return {
+    data: availableSlots,
+    message: "Available slots retrieved successfully",
+  };
 };

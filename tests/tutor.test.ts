@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { getWorkingHoursForWeekday } from "../src/modules/availability/avavlability.service";
 import { getListAvailableTimeSlots, getWeekdayEnumFromDate } from "../src/common/utils/time.js";
 import { getDetailService, getAllAdminServices } from "../src/modules/services/service.service.js";
-import { getAllTurors, getTutorById } from '../src/modules/tutor/tutor.repository.js'
+import { getAllTurors, getTutorById, getTutorBySubject } from '../src/modules/tutor/tutor.repository.js'
 
 describe("getWorkingHoursForWeekday", () => {
   it('Get working hours ', async () => {
@@ -63,6 +63,14 @@ describe('getDetailsTutor', () => {
   it('get details tutor', async () => {
     const id = process.env.ID
     const data = await getTutorById(Number(id))
+    console.log({data})
+  })
+})
+
+describe('getTutorBySubject', () => {
+  it('get tutor by subject', async () => {
+    const subject = process.env.SUBJECT || ""
+    const data = await getTutorBySubject(subject)
     console.log({data})
   })
 })

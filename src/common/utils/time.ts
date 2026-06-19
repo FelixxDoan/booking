@@ -60,10 +60,15 @@ export const getListAvailableTimeSlots = async (
   serviceId: string
 ) => {
   const weekday = getWeekdayEnumFromDate(date);
+  console.log({weekday})
   const workingHours = await getWorkingHoursForWeekday(weekday);
-
+console.log({workingHours})
   if (!workingHours) {
     return throwErr(404, "Working hours not found for the specified date");
+  }
+
+  if(!workingHours.isActive) {
+    return []
   }
 
   const service = await detailService(serviceId);

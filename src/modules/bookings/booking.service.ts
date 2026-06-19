@@ -13,3 +13,4 @@ export const createBookingService = async ( bookingInput: CreateBookingInput,stu
         throw error
     }
 }
+

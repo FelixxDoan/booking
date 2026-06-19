@@ -31,6 +31,23 @@ export const getTutorById = async (id: number) => {
     });
 }
 
+export const getTutorBySubject = async (subject: string) => {
+    return await prisma.tutorProfile.findMany({
+        where: {
+            subjects: { has: subject }
+        },
+        select: {
+            user: {
+                select: {
+                    id: true,
+                    fullName: true,
+                }
+            },
+        },
+    });
+}
+
+
 export const upsertTutorProfile = async (id: number, tutorProfile: tutorProfileInput) => {
     return await prisma.tutorProfile.upsert({
         where: {
@@ -46,5 +63,6 @@ export const upsertTutorProfile = async (id: number, tutorProfile: tutorProfileI
                     id,
                 },
             }
-        }})
+        }
+    })
 }

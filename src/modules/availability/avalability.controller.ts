@@ -4,7 +4,8 @@ import {
     getAllBlockedSlotsService,
     getWorkingHoursService,
     updateWorkingHoursService,
-    serviceAvailableSlots
+    serviceAvailableSlots,
+    tutorAvailableSlots
 } from "./avavlability.service.js";
 
 export const getWorkingHoursController = handleRespone(async (req, res) => {
@@ -44,7 +45,13 @@ export const availabilityQueryController = handleRespone(async (req, res) => {
     ok(res, data, message)
 });
 
+export const tutorAvailableController = handleRespone(async (req, res) => {
+    const { subject } = req.query;
 
+    const { data, message } = await tutorAvailableSlots(subject)
+
+    ok(res, data, message)
+});
 
 
 export const deleteBlockedSlotController = handleRespone(async (req, res) => {

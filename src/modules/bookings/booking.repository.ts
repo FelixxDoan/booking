@@ -2,10 +2,9 @@ import { prisma } from "@config/db.js"
 import { bookingStatusesConsumeTime } from "./booking-status.policy.js"
 import type { CreateBookingInput } from "./booking.validation.js"
 
-
 export const getBookedSlots = async (
     { date, tutorId }:
-        { date: Date, tutorId: number }
+        { date: Date, tutorId?: number }
 ) => {
 
     return await prisma.booking.findMany({
@@ -58,4 +57,8 @@ export const createBooking = async (
             studentNote,
         }
     })
+}
+
+export const getAllBookings = async () => {
+    return await prisma.booking.findMany()
 }

@@ -15,7 +15,6 @@ const idParamSchema = z.object({
 export const createBookingSchema = z.object({
   body: z
     .object({
-      serviceId: z.string().uuid("Invalid service id"),
       tutorId: z.number().int().positive().optional(),
       bookingDate: dateOnlySchema,
       startTime: timeSchema,
