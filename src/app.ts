@@ -51,7 +51,7 @@ const createApp = () => {
   app.use("/services", serviceRouter);
   app.use("/tutor", tutorRouter);
   app.use("/availability", availabilityRouter);
-  app.use("/bookings",bookingRouter )
+  app.use("/bookings", bookingRouter)
 
 
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

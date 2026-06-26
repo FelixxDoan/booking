@@ -49,24 +49,31 @@ export const cancelBookingSchema = z.object({
   }),
 });
 
+export const rescheduleInputSchema = z.object({
+  newBookingDate: dateOnlySchema,
+  newStartTime: timeSchema,
+  newEndTime: timeSchema,
+});
+
 export const rescheduleBookingSchema = z.object({
   params: idParamSchema,
-  body: z
-    .object({
-      bookingDate: dateOnlySchema,
-      startTime: timeSchema,
-      endTime: timeSchema,
-    })
-    .superRefine((data, ctx) => {
-      if (data.startTime >= data.endTime) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["endTime"],
-          message: "endTime must be after startTime",
-        });
-      }
-    }),
+
+  body: z.object({
+    rescheduleInput: rescheduleInputSchema,
+  }).superRefine((data, ctx) => {
+    const { newStartTime, newEndTime } = data.rescheduleInput;
+
+    if (newStartTime >= newEndTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["rescheduleInput", "newEndTime"],
+        message: "endTime must be after startTime",
+      });
+    }
+  }),
 });
+
+export type RescheduleInput = z.infer<typeof rescheduleInputSchema>;
 
 export const assignTutorSchema = z.object({
   params: idParamSchema,

@@ -8,7 +8,6 @@ import { getBookedSlots } from "@modules/bookings/booking.repository.js";
 import { getTutorById, getTutorBySubject } from "@modules/tutor/tutor.repository.js";
 
 export type Slot = {
-    date: Date;
     startTime: string;
     endTime: string;
 };
@@ -19,7 +18,6 @@ type TimeRange = {
 };
 
 type BlockedSlotResult = {
-    date: Date;
     startTime: string | null;
     endTime: string | null;
 };
@@ -36,7 +34,7 @@ type CreateBlockedSlotInput = {
 type ServiceAvailableSlotsInput = {
     date: string | Date;
     serviceId: string;
-    tutorId?: number;
+    tutorId?: number|null;
 };
 
 /**
@@ -295,7 +293,6 @@ export const tutorAvailableSlots = async ( subject: string ) => {
     }
 };
 
-
 export const serviceAvailableSlots = async ({
   date: targetDate,
   serviceId,
@@ -309,10 +306,8 @@ export const serviceAvailableSlots = async ({
       : undefined;
 
   const candidateSlots = await getListAvailableTimeSlots(date, serviceId);
-  console.log({candidateSlots})
 
   const blockedSlots = await getDetailsBlockedSlotService(date, tutorId);
-//   console.log({blockedSlots})
 
   if (hasFullDayBlockedSlot(blockedSlots)) {
     return {
@@ -328,13 +323,11 @@ export const serviceAvailableSlots = async ({
   }
 
   const bookedSlots = await getBookedSlots({ date, tutorId })
-//   console.log({bookedSlots})
 
   const unavailableRanges: TimeRange[] = [
     ...mapBlockedSlotsToTimeRanges(blockedSlots),
     ...mapBookedSlotsToTimeRanges(bookedSlots),
   ];
-//   console.log({unavailableRanges})
 
   const availableSlots = filterAvailableSlots(candidateSlots, unavailableRanges);
 

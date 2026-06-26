@@ -60,9 +60,7 @@ export const getListAvailableTimeSlots = async (
   serviceId: string
 ) => {
   const weekday = getWeekdayEnumFromDate(date);
-  console.log({weekday})
   const workingHours = await getWorkingHoursForWeekday(weekday);
-console.log({workingHours})
   if (!workingHours) {
     return throwErr(404, "Working hours not found for the specified date");
   }
@@ -85,13 +83,11 @@ console.log({workingHours})
 
   while (currentTime + intervalTime <= endTimeInMinutes) {
 
-
     let endTimeForSlot = currentTime + durationMinutes;
     if (endTimeForSlot > endTimeInMinutes) {
       break;
     }
     const slot : Slot= {
-      date,
       startTime: minutesToTime(currentTime),
       endTime: minutesToTime(endTimeForSlot),
     };

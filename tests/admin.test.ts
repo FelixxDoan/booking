@@ -1,5 +1,5 @@
 import { describe, it } from 'vitest';
-import { deleteUser, getAllUsers } from "../src/modules/users/user.repository"
+import { deleteUser, findUserByEmail, getAllUsers } from "../src/modules/users/user.repository"
 import { getWorkingHoursService } from "../src/modules/availability/avavlability.service"
 import { getAllBookings } from '../src/modules/bookings/booking.repository'
 
@@ -50,5 +50,13 @@ describe("getAllBookings", () => {
     it("Get all bookings", async () => {
         const data = await getAllBookings()
         console.log("bookings: ", data)
+    })
+})
+
+describe("getDetailsUser", () =>{
+    it('get details user', async () => {
+        const email = process.env.EMAIL
+        const {studentBookings: data} = await findUserByEmail(email)
+        console.log({data})
     })
 })

@@ -22,31 +22,38 @@ export const createUser = async ({
   });
 };
 
-export const findUserByEmail = async (email : LoginInput) => {
+export type UserByEmail = {
+  id: number,
+  role: "STUDENT" | "TUTOR" | "ADMIN",
+  passwordHash: string,
+  email: string
+} | null
+
+export const findUserByEmail = async (email: LoginInput) => {
   return prisma.user.findUnique({
     where: {
       email,
     },
     select: {
-      id:true,
-      email: true,
+      id: true,
       role: true,
       passwordHash: true,
+      email: true
     },
   });
 };
 
 
-export const findUserById = async (id : number) => {
+export const findUserById = async (id: number) => {
   return prisma.user.findUnique({
     where: {
       id,
     },
     select: {
       email: true,
-      fullName:true,
-      status:true,
-      id:true,
+      fullName: true,
+      status: true,
+      id: true,
       role: true,
     },
   });
@@ -81,8 +88,8 @@ export const getAllUsers = async () => {
   });
 };
 
-export const deleteUser = async (id:number | string) => {
-  const transId = typeof(id) === "string" ? Number(id) : id
+export const deleteUser = async (id: number | string) => {
+  const transId = typeof (id) === "string" ? Number(id) : id
   return await prisma.user.delete({
     where: {
       id: transId
